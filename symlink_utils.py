@@ -1,5 +1,4 @@
 from pathlib import Path
-import json
 import os
 import utils
 
@@ -13,8 +12,7 @@ def update_car_symlinks(data):
         create_symlink_file()
         symlink_file = Path(SYMLINK_PATH)
 
-    with open(symlink_file, "r") as file:
-        symlinks = json.load(file)
+    symlinks = utils.get_data(symlink_file)
 
     car_paths_to_add = []
     car_paths_to_remove = []
@@ -27,7 +25,9 @@ def update_car_symlinks(data):
             car_paths_to_remove.append(utils.get_paths_list(path, profile["items"]))
 
     car_paths_to_add = sum(car_paths_to_add, [])
-    add_car_symlinks(car_paths_to_add, symlinks, data["assetto_path"])
+    add_car_symlinks(
+        car_paths_to_add, symlinks, f"{data['assetto_path']}\\content\\cars"
+    )
 
     car_paths_to_remove = sum(car_paths_to_remove, [])
     remove_car_symlinks(car_paths_to_remove, symlinks)
@@ -41,8 +41,8 @@ def add_car_symlinks(car_paths, symlinks, dest_path):
     car_paths_to_add = list(set(car_paths) - set(cars_src))
 
     for car in car_paths_to_add:
-        link = create_symlink(car, dest_path)
-        symlinks["cars"].append(link)
+        car_link = create_symlink(car, dest_path)
+        symlinks["cars"].append(car_link)
 
     utils.write_to_json(SYMLINK_PATH, symlinks)
 
@@ -67,6 +67,58 @@ def update_track_symlinks(data):
 
     if not symlink_file.exists():
         create_symlink_file()
+        symlink_file = Path(SYMLINK_PATH)
+
+    symlinks = utils.get_data(SYMLINK_PATH)
+
+    track_paths_to_add = []
+    track_paths_to_remove = []
+
+    for profile in data["track_profiles"]:
+        path = f"{data['tracks_path']}\\{profile['profile']}"
+        if profile["status"]:
+            track_paths_to_add.append(utils.get_paths_list(path, profile["items"]))
+        else:
+            track_paths_to_remove.append(utils.get_paths_list(path, profile["items"]))
+
+    track_paths_to_add = sum(track_paths_to_add, [])
+    add_track_symlinks(
+        track_paths_to_add, symlinks, f"{data['assetto_path']}\\content\\tracks"
+    )
+
+    track_paths_to_remove = sum(track_paths_to_remove, [])
+    remove_track_symlinks(track_paths_to_remove, symlinks)
+
+
+def add_track_symlinks(track_paths, symlinks, dest_path):
+    tracks_src = []
+    for track in symlinks["tracks"]:
+        tracks_src.append(track["src"])
+
+    track_paths_to_add = list(set(track_paths) - set(tracks_src))
+
+    for track in track_paths_to_add:
+        track_link = create_symlink(track, dest_path)
+        symlinks["tracks"].append(track_link)
+
+    utils.write_to_json(SYMLINK_PATH, symlinks)
+
+
+def remove_track_symlinks(track_paths, symlinks):
+    tracks_src = []
+    for track in symlinks["tracks"]:
+        tracks_src.append(track["src"])
+
+    track_paths_to_remove = utils.filter_remove(track_paths, tracks_src)
+
+    for track_path in track_paths_to_remove:
+        track = next(
+            track for track in symlinks["tracks"] if track["src"] == track_path
+        )
+        remove_symlink(track["dest"])
+        symlinks["tracks"].remove(track)
+
+    utils.write_to_json(SYMLINK_PATH, symlinks)
 
 
 def create_symlink_file():
@@ -94,3 +146,15 @@ def remove_symlink(dest):
         print(f"Removed symlink: {dest}")
     except Exception as e:
         print(e)
+
+
+def remove_all_symlinks(symlinks):
+    for car in symlinks["cars"]:
+        remove_symlink(car["dest"])
+
+    for track in symlinks["tracks"]:
+        remove_symlink(track["dest"])
+
+    create_symlink_file()
+
+    print("All symlinks removed")

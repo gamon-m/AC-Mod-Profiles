@@ -1,6 +1,7 @@
 import questionary
 import config_utils as cfg
 import utils
+from symlink_utils import remove_all_symlinks, SYMLINK_PATH
 
 
 def display_track_profiles():
@@ -74,7 +75,7 @@ def display_settings():
         option = questionary.select(
             "Select option:",
             choices=[
-                "Change Assetto Corsa path",
+                "Change Assetto Corsa path (will remove all symlinks)",
                 "Change track profiles path",
                 "Change car profiles path",
                 "Reset config",
@@ -88,11 +89,14 @@ def display_settings():
             break
 
         match option:
-            case "Change Assetto Corsa path":
+            case "Change Assetto Corsa path (will remove all symlinks)":
                 path = cfg.get_assetto_path()
                 data["assetto_path"] = path
 
-                cfg.write_to_json(cfg.CONFIG_PATH, data)
+                symlinks = utils.get_data(SYMLINK_PATH)
+                remove_all_symlinks(symlinks)
+
+                utils.write_to_json(cfg.CONFIG_PATH, data)
             case "Change track profiles path":
                 path = cfg.get_tracks_path()
                 track_profiles = cfg.make_profiles(path)
@@ -100,7 +104,7 @@ def display_settings():
                 data["tracks_path"] = path
                 data["track_profiles"] = track_profiles
 
-                cfg.write_to_json(cfg.CONFIG_PATH, data)
+                utils.write_to_json(cfg.CONFIG_PATH, data)
             case "Change car profiles path":
                 path = cfg.get_cars_path()
                 car_profiles = cfg.make_profiles(path)
@@ -108,7 +112,7 @@ def display_settings():
                 data["cars_path"] = path
                 data["car_profiles"] = car_profiles
 
-                cfg.write_to_json(cfg.CONFIG_PATH, data)
+                utils.write_to_json(cfg.CONFIG_PATH, data)
             case "Reset config":
                 track_profiles = cfg.make_profiles(data["tracks_path"])
                 car_profiles = cfg.make_profiles(data["cars_path"])
@@ -116,9 +120,12 @@ def display_settings():
                 data["track_profiles"] = track_profiles
                 data["car_profiles"] = car_profiles
 
-                cfg.write_to_json(cfg.CONFIG_PATH, data)
+                utils.write_to_json(cfg.CONFIG_PATH, data)
+
+                print("Config has been reset")
             case "Remove all symlinks":
-                pass
+                symlinks = utils.get_data(SYMLINK_PATH)
+                remove_all_symlinks(symlinks)
 
     display_start_screen()
 
