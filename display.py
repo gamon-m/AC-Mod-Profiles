@@ -25,7 +25,7 @@ def display_track_profiles():
         track_profiles = cfg.toggle_profiles(track_profiles, selected_profiles)
 
         option = questionary.select(
-            "", choices=["Cancel", "Edit selection", "Save and exit"]
+            "", choices=["Save and exit", "Edit selection", "Cancel"]
         ).ask()
 
         if not option == "Edit selection":
@@ -57,7 +57,7 @@ def display_car_profiles():
         car_profiles = cfg.toggle_profiles(car_profiles, selected_profiles)
 
         option = questionary.select(
-            "", choices=["Cancel", "Edit selection", "Save and exit"]
+            "", choices=["Save and exit", "Edit selection", "Cancel"]
         ).ask()
 
         if not option == "Edit selection":
