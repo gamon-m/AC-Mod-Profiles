@@ -5,6 +5,7 @@ from questionary import Choice
 from pathlib import Path
 
 CONFIG_PATH = "config.json"
+SYMLINK_PATH = "symlinks.json"
 
 
 def write_to_json(path, data):
@@ -141,18 +142,106 @@ def get_data():
 def create_symlink_file():
     data = {"tracks": [], "cars": []}
 
-    write_to_json("symlinks.json", data)
+    write_to_json(SYMLINK_PATH, data)
 
 
-def update_car_symlinks():
-    symlink_file = Path("symlinks.json")
+def add_car_symlinks(car_paths, symlinks, dest_path):
+    cars_src = []
+    for car in symlinks["cars"]:
+        cars_src.append(car["src"])
+
+    car_paths_to_add = list(set(car_paths) - set(cars_src))
+
+    for car in car_paths_to_add:
+        link = create_symlink(car, dest_path)
+        symlinks["cars"].append(link)
+
+    write_to_json(SYMLINK_PATH, symlinks)
+
+
+def remove_car_symlinks(car_paths, symlinks):
+    cars_src = []
+    for car in symlinks["cars"]:
+        cars_src.append(car["src"])
+
+    car_paths_to_remove = filter_remove(car_paths, cars_src)
+
+    for car_path in car_paths_to_remove:
+        car = next(car for car in symlinks["cars"] if car["src"] == car_path)
+        remove_symlink(car["dest"])
+        symlinks["cars"].remove(car)
+
+    write_to_json(SYMLINK_PATH, symlinks)
+
+
+def update_car_symlinks(data):
+    symlink_file = Path(SYMLINK_PATH)
 
     if not symlink_file.exists():
         create_symlink_file()
+        symlink_file = Path(SYMLINK_PATH)
+
+    with open(symlink_file, "r") as file:
+        symlinks = json.load(file)
+
+    car_paths_to_add = []
+    car_paths_to_remove = []
+
+    for profile in data["car_profiles"]:
+        path = f"{data['cars_path']}\\{profile['profile']}"
+        if profile["status"]:
+            car_paths_to_add.append(get_paths_list(path, profile["items"]))
+        else:
+            car_paths_to_remove.append(get_paths_list(path, profile["items"]))
+
+    car_paths_to_add = sum(car_paths_to_add, [])
+    add_car_symlinks(car_paths_to_add, symlinks, data["assetto_path"])
+
+    car_paths_to_remove = sum(car_paths_to_remove, [])
+    remove_car_symlinks(car_paths_to_remove, symlinks)
 
 
-def update_track_symlinks():
-    symlink_file = Path("symlinks.json")
+def filter_remove(items, sources):
+    filtered_items = []
+    for item in items:
+        if item in sources:
+            filtered_items.append(item)
+
+    return filtered_items
+
+
+def create_symlink(src, dest):
+    folder = os.path.split(src)[1]
+    dest = f"{dest}\\{folder}"
+
+    try:
+        os.symlink(src, dest)
+        print(f"Created symlink: {src} -> {dest}")
+    except Exception as e:
+        print(e)
+
+    return {"src": src, "dest": dest}
+
+
+def remove_symlink(dest):
+    try:
+        os.remove(dest)
+        print(f"Removed symlink: {dest}")
+    except Exception as e:
+        print(e)
+
+
+def get_paths_list(path, item_list):
+    path_list = []
+
+    for item in item_list:
+        path_list.append(f"{path}\\{item}")
+
+    return path_list
+
+
+def update_track_symlinks(data):
+    symlink_file = Path(SYMLINK_PATH)
 
     if not symlink_file.exists():
         create_symlink_file()
@@ -161,8 +250,8 @@ def update_track_symlinks():
 def save_track_profiles(data, profiles):
     data["track_profiles"] = profiles
 
-    write_to_json(data)
-    update_track_symlinks(data["track_profiles"])
+    write_to_json(CONFIG_PATH, data)
+    update_track_symlinks(data)
 
     print("Saved track profiles.")
 
@@ -170,7 +259,7 @@ def save_track_profiles(data, profiles):
 def save_car_profiles(data, profiles):
     data["car_profiles"] = profiles
 
-    write_to_json(data)
-    update_car_symlinks(data["car_profiles"])
+    write_to_json(CONFIG_PATH, data)
+    update_car_symlinks(data)
 
     print("Saved car profiles.")
