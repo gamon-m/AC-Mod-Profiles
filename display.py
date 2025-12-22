@@ -1,9 +1,10 @@
 import questionary
 import config_utils as cfg
+import utils
 
 
 def display_track_profiles():
-    data = cfg.get_data()
+    data = utils.get_data(cfg.CONFIG_PATH)
     track_profiles = data["track_profiles"]
 
     option = ""
@@ -35,7 +36,7 @@ def display_track_profiles():
 
 
 def display_car_profiles():
-    data = cfg.get_data()
+    data = utils.get_data(cfg.CONFIG_PATH)
     car_profiles = data["car_profiles"]
 
     option = ""
@@ -67,7 +68,7 @@ def display_car_profiles():
 
 
 def display_settings():
-    data = cfg.get_data()
+    data = utils.get_data(cfg.CONFIG_PATH)
 
     while True:
         option = questionary.select(
