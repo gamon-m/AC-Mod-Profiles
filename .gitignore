@@ -1,5 +1,8 @@
 /__pycache__
 /.venv
 /.vscode
+/build
+/dist
+acmp.spec
 config.json
 symlinks.json
