@@ -1,30 +1,27 @@
 import os
 from pathlib import Path
 import json
+import questionary
 
 CONFIG_PATH = "config.json"
 
 
 def get_folder_path(folder):
     folder_path = ""
+
     while True:
-        os.system("cls")
+        folder_path = questionary.path(
+            f"Enter the path to your {folder} folder:\n",
+            only_directories=True,
+            qmark=False,
+        ).ask()
 
-        print(f"Enter the path to your {folder} folder:")
-        folder_path = input()
+        confirm = questionary.confirm("Confirm path?").ask()
 
-        os.system("cls")
-        print("You entered the following path:")
-        print(folder_path)
-
-        print("Is this correct? (y/N)")
-        user_input = input()
-
-        if not user_input.lower() == "n":
+        if confirm:
             break
 
-    os.system("cls")
-    return str(Path(folder_path.strip()))
+    return folder_path
 
 
 def get_assetto_path():
@@ -87,3 +84,17 @@ def create_config_file():
 
     with open(CONFIG_PATH, "w") as file:
         json.dump(data, file, indent=2)
+
+
+def create_json_field(field, value, json_file):
+    new_field = {field: value}
+    json_file.append(new_field)
+    return json_file
+
+
+def update_json_field(field, value, json_file):
+    if field in json_file:
+        json_file[field] = value
+        return json_file
+
+    return create_json_field(field, value, json_file)

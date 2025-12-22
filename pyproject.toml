@@ -1,0 +1,20 @@
+[project]
+name = "acmp"
+version = "0.1.0"
+description = "Assetto Corsa mod profile manager for tracks and cars"
+authors = [
+    {name = "gamon"}
+]
+readme = "README.md"
+requires-python = ">=3.14,<4.0"
+dependencies = [
+    "questionary (>=2.1.1,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+acmp = "acmp:main"
