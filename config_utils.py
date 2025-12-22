@@ -1,9 +1,15 @@
 import os
-from pathlib import Path
 import json
 import questionary
+from questionary import Choice
+from pathlib import Path
 
 CONFIG_PATH = "config.json"
+
+
+def write_to_json(path, data):
+    with open(path, "w") as file:
+        json.dump(data, file, indent=2)
 
 
 def get_folder_path(folder):
@@ -13,7 +19,7 @@ def get_folder_path(folder):
         folder_path = questionary.path(
             f"Enter the path to your {folder} folder:\n",
             only_directories=True,
-            qmark=False,
+            qmark="",
         ).ask()
 
         confirm = questionary.confirm("Confirm path?").ask()
@@ -37,7 +43,14 @@ def get_cars_path():
 
 
 def get_dirs_from_path(path):
-    return os.listdir(path)
+    directories = []
+    all_files = os.listdir(path)
+
+    for file in all_files:
+        if os.path.isdir(f"{path}\\{file}"):
+            directories.append(file)
+
+    return directories
 
 
 def make_profiles(path):
@@ -82,8 +95,17 @@ def create_config_file():
     data["track_profiles"] = track_profiles
     data["car_profiles"] = car_profiles
 
-    with open(CONFIG_PATH, "w") as file:
-        json.dump(data, file, indent=2)
+    write_to_json(CONFIG_PATH, data)
+
+
+def toggle_profiles(profiles, selected):
+    for profile in profiles:
+        if profile["profile"] in selected:
+            profile["status"] = True
+        else:
+            profile["status"] = False
+
+    return profiles
 
 
 def create_json_field(field, value, json_file):
@@ -98,3 +120,57 @@ def update_json_field(field, value, json_file):
         return json_file
 
     return create_json_field(field, value, json_file)
+
+
+def get_choices(profiles):
+    choices = []
+
+    for profile in profiles:
+        choices.append(Choice(profile["profile"], checked=profile["status"]))
+
+    return choices
+
+
+def get_data():
+    with open(CONFIG_PATH, "r") as file:
+        data = json.load(file)
+
+    return data
+
+
+def create_symlink_file():
+    data = {"tracks": [], "cars": []}
+
+    write_to_json("symlinks.json", data)
+
+
+def update_car_symlinks():
+    symlink_file = Path("symlinks.json")
+
+    if not symlink_file.exists():
+        create_symlink_file()
+
+
+def update_track_symlinks():
+    symlink_file = Path("symlinks.json")
+
+    if not symlink_file.exists():
+        create_symlink_file()
+
+
+def save_track_profiles(data, profiles):
+    data["track_profiles"] = profiles
+
+    write_to_json(data)
+    update_track_symlinks(data["track_profiles"])
+
+    print("Saved track profiles.")
+
+
+def save_car_profiles(data, profiles):
+    data["car_profiles"] = profiles
+
+    write_to_json(data)
+    update_car_symlinks(data["car_profiles"])
+
+    print("Saved car profiles.")
