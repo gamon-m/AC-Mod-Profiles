@@ -1,6 +1,6 @@
 [project]
 name = "acmp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Assetto Corsa mod profile manager for tracks and cars"
 authors = [
     {name = "gamon"}

@@ -6,3 +6,4 @@
 acmp.spec
 config.json
 symlinks.json
+.gitignore
