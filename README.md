@@ -93,3 +93,13 @@ You should now see the built exe file in `project_root/dist/acmp`
 You can open this file from this folder or move it wherever you like 
 
 **Remember to always run as administartor!!!**
+
+## Images
+<img width="569" height="281" alt="acmp_WOV6vxOKtk" src="https://github.com/user-attachments/assets/12b7acbc-9058-421f-a824-b3abda907a31" />
+<img width="569" height="281" alt="acmp_1zMwowDxLO" src="https://github.com/user-attachments/assets/ed640c6e-5fff-412b-a75c-050e11e7f8a7" />
+<img width="569" height="281" alt="acmp_2Uplp6zqwu" src="https://github.com/user-attachments/assets/4df172e9-b666-4954-98ee-7e832275fcbd" />
+<img width="569" height="281" alt="acmp_T3Y7LTA1Jq" src="https://github.com/user-attachments/assets/c61e1007-38c0-488e-989c-247b915c6c76" />
+<img width="569" height="281" alt="acmp_fFFf3FKMcd" src="https://github.com/user-attachments/assets/36ef9524-a1a4-4010-98c1-1a8b5846c2fa" />
+<img width="944" height="770" alt="explorer_9zGMB30mYN" src="https://github.com/user-attachments/assets/ce1ee3d0-ae64-44af-b14b-47c7f856399e" />
+<img width="945" height="771" alt="firefox_AfhXQO9Y44" src="https://github.com/user-attachments/assets/0caaa922-db6d-4ab6-96a0-0c8b927383ef" />
+
